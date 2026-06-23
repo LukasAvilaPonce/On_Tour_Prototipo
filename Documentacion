@@ -1,1 +1,149 @@
+Evaluación Parcial N°3
+Modelos de Calidad Aplicados al Desarrollo de Prototipos de Software
+Caso de Estudio: Agencia de Viajes On Tour
+Asignatura: Ingeniería de Software
+Docente: Edward Mitchell
+Integrantes:
+Santiago Mendoza
+Juan Carlos Alvarado
+Constanza Cerda
+Lukas Avila
+Andrés Osorio
+
+Fecha: 23 / 06 / 2026
+
+
+
+
+Actividad 1: Análisis del Problema
+La Agencia de Viajes On Tour ofrece giras de estudio cuyo financiamiento se realiza mediante aportes periódicos de los apoderados. Hoy los apoderados no cuentan con acceso oportuno y transparente a la información clave del viaje (saldo acumulado, estado de pagos, contratos, coberturas de seguro y avance de la meta económica), lo que genera incertidumbre, consultas presenciales constantes y desconfianza. La solución propuesta es una plataforma web que centralice esta información y permita su consulta autónoma.
+Tabla de Actores
+Actor	Descripción	Necesidad principal
+Apoderado	Padre/madre/tutor que financia la gira de un estudiante	Consultar saldo acumulado, depósitos, contrato, póliza y avance de la meta
+Ejecutivo	Funcionario de la agencia que gestiona los contratos	Administrar contratos y registrar/validar información de pagos
+Administrador	Encargado de mantención del sistema y datos maestros	Mantener información de cursos, metas, usuarios y documentos
+Gerencia	Dirección de la agencia	Consultar indicadores y reportes de avance de recaudación
+
+Tabla de Funcionalidades
+Funcionalidad	Actor	Prioridad
+Iniciar sesión	Todos	Alta
+Consultar saldo acumulado y avance de meta	Apoderado	Alta
+Consultar historial de depósitos	Apoderado	Alta
+Descargar contrato	Apoderado	Alta
+Descargar póliza de seguro	Apoderado	Alta
+Administrar contratos	Ejecutivo	Alta
+Consultar reporte de avance / indicadores	Gerencia	Media
+Mantener información maestra	Administrador	Media
+
+Actividad 3: Aplicación de Calidad ISO/IEC 25010
+Se justifica a continuación cómo el prototipo incorpora cinco características de calidad del modelo ISO/IEC 25010.
+Característica	Aplicación en el prototipo	Justificación
+Usabilidad	Navegación intuitiva, dashboard con barra de avance e iconografía clara	El apoderado accede a la información clave en pocos clics; las pantallas usan lenguaje cercano y consistente, reduciendo la curva de aprendizaje.
+Fiabilidad	Información validada y consistente entre pantallas (saldo, meta y avance siempre coinciden)	Los datos provienen de una sola fuente; el porcentaje de avance se calcula automáticamente desde el saldo y la meta, evitando inconsistencias.
+Seguridad	Login obligatorio con usuario y contraseña; cada apoderado solo ve su propia información	El acceso restringido por rol y por sesión protege datos financieros y personales, impidiendo que un apoderado vea datos de otro.
+Eficiencia (desempeño)	Acceso directo a cada consulta desde el dashboard; mínimos pasos por tarea	Las acciones frecuentes (ver saldo, descargar documento) están a un clic, minimizando el tiempo y los pasos para completar una consulta.
+Mantenibilidad	Diseño modular: pantallas y componentes independientes y reutilizables	La separación por módulos permite incorporar nuevas funcionalidades o corregir una sin afectar al resto, facilitando la evolución del sistema.
+
+Actividad 4: Historias de Usuario
+HU-01
+Como Apoderado
+Quiero consultar mi saldo acumulado y el avance de la meta
+Para conocer cuánto dinero se ha reunido y cuánto falta para completar la gira.
+HU-02
+Como Apoderado
+Quiero ver el historial de depósitos realizados
+Para verificar que todos mis pagos quedaron registrados correctamente.
+HU-03
+Como Apoderado
+Quiero descargar el contrato asociado a la gira
+Para tener respaldo de las condiciones acordadas con la agencia.
+HU-04
+Como Apoderado
+Quiero descargar la póliza del seguro de viaje
+Para conocer las coberturas con las que está protegido mi hijo durante la gira.
+HU-05
+Como Ejecutivo
+Quiero administrar los contratos de los apoderados
+Para mantener la información contractual actualizada y disponible.
+HU-06
+Como Gerencia
+Quiero consultar un reporte de avance de la recaudación
+Para tomar decisiones sobre las giras según el cumplimiento de las metas económicas.
+
+Actividad 5: Criterios de Aceptación
+HU-01 — Consultar saldo y avance
+•	CA01: Debe mostrar el saldo acumulado del apoderado.
+•	CA02: Debe mostrar la meta total y el saldo pendiente.
+•	CA03: Debe mostrar el porcentaje de avance de forma numérica y gráfica.
+•	CA04: El avance debe actualizarse al registrarse un nuevo depósito.
+
+HU-02 — Historial de depósitos
+•	CA05: Debe listar cada depósito con fecha y monto.
+•	CA06: Debe mostrar el total depositado coincidente con el saldo acumulado.
+•	CA07: Debe permitir ordenar los depósitos por fecha.
+
+HU-03 — Descargar contrato
+•	CA08: Debe permitir descargar el contrato en formato PDF.
+•	CA09: El contrato descargado debe corresponder al apoderado autenticado.
+•	CA10: Debe mostrar un mensaje si no existe contrato asociado.
+
+HU-04 — Descargar póliza
+•	CA11: Debe permitir descargar la póliza en formato PDF.
+•	CA12: Debe mostrar las coberturas asociadas a la póliza.
+•	CA13: Debe mostrar un mensaje si no existe póliza asociada.
+
+HU-05 — Administrar contratos
+•	CA14: Debe permitir crear, editar y consultar contratos.
+•	CA15: Solo el ejecutivo autenticado puede administrar contratos.
+•	CA16: Debe validar los campos obligatorios antes de guardar.
+
+HU-06 — Reporte de avance
+•	CA17: Debe mostrar el porcentaje de avance por curso/gira.
+•	CA18: Debe mostrar el monto total recaudado y la meta global.
+•	CA19: Debe permitir filtrar el reporte por gira.
+
+
+Actividad 6: Casos de Prueba
+Se construyen 12 casos de prueba que validan los criterios de aceptación definidos.
+ID	Caso de prueba	Datos de entrada	Resultado esperado	Resultado obtenido	Estado
+CP01	Login con credenciales válidas	usuario y contraseña correctos	Acceso al dashboard del apoderado	Acceso correcto	OK
+CP02	Login con credenciales inválidas	contraseña incorrecta	Mensaje de error y permanece en login	Mensaje mostrado	OK
+CP03	Visualizar saldo acumulado	apoderado autenticado	Muestra saldo acumulado actual	Saldo mostrado	OK
+CP04	Visualizar avance de meta	saldo = 600.000 / meta = 1.000.000	Muestra 60% de avance	60% mostrado	OK
+CP05	Actualizar avance tras depósito	nuevo depósito de 100.000	Avance sube de 60% a 70%	70% mostrado	OK
+CP06	Listar historial de depósitos	apoderado con 3 depósitos	Lista 3 depósitos con fecha y monto	3 depósitos listados	OK
+CP07	Cuadratura de total depositado	suma de depósitos	Total coincide con saldo acumulado	Coinciden	OK
+CP08	Descargar contrato	apoderado con contrato	Descarga PDF del contrato	PDF descargado	OK
+CP09	Descargar contrato inexistente	apoderado sin contrato	Mensaje 'sin contrato asociado'	Mensaje mostrado	OK
+CP10	Descargar póliza	apoderado con póliza	Descarga PDF de la póliza	PDF descargado	OK
+CP11	Administrar contrato (ejecutivo)	ejecutivo edita un contrato	Guarda los cambios correctamente	Cambios guardados	OK
+CP12	Reporte de avance (gerencia)	filtro por gira	Muestra avance y recaudación de la gira	Reporte mostrado	OK
+
+Actividad 8: Registro de Defectos
+Se documentan los defectos detectados durante la ejecución de las pruebas y su estado de resolución.
+ID Defecto	Caso relacionado	Descripción	Severidad	Estado
+DEF01	CP05	El porcentaje de avance no se actualizaba inmediatamente tras registrar un depósito; requería recargar la página.	Media	Corregido
+DEF02	CP04	El porcentaje de avance se mostraba con muchos decimales (60.0000%) en lugar de redondeado.	Baja	Corregido
+DEF03	CP09	Al no existir contrato, el sistema mostraba pantalla en blanco en vez de un mensaje informativo.	Media	Corregido
+DEF04	CP02	El mensaje de error de login era poco claro ('error') sin indicar la causa.	Baja	Corregido
+DEF05	CP11	Permitía guardar un contrato con campos obligatorios vacíos.	Alta	Abierto
+
+Actividad 9: Control de Versiones (Guía y evidencias)
+Esta sección documenta el flujo de trabajo en GitHub. Las capturas de pantalla solicitadas (repositorio, ramas e historial de commits) deben adjuntarse en los espacios indicados.
+Ramas del repositorio
+•	main — versión estable e integrada del proyecto.
+•	feature/prototipo — desarrollo del prototipo HTML / diseño de pantallas.
+•	feature/documentacion — historias de usuario, criterios y documentación.
+•	feature/pruebas — casos de prueba y registro de defectos.
+
+Comandos sugeridos
+git init
+git checkout -b feature/prototipo
+git add . && git commit -m "Se agrega Dashboard Apoderado"
+git push -u origin feature/prototipo
+
+Evidencias (insertar capturas)
+[ Captura del repositorio ]
+[ Captura de las ramas ]
+ [ Captura del historial de commits ]
 
