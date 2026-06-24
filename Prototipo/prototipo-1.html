@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On Tour — Plataforma de Apoderados</title>
+<style>
+  :root{
+    --azul:#2E5AAC; --azul-osc:#1F3A6E; --celeste:#EAF1FB; --verde:#2BA84A;
+    --gris:#6B7280; --borde:#E2E8F0; --bg:#F4F7FC; --rojo:#D9534F; --amarillo:#E0A800;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+  body{background:var(--bg);color:#1F2937}
+  .screen{display:none;min-height:100vh}
+  .screen.active{display:block}
+
+  /* LOGIN */
+  #login{display:none;min-height:100vh;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--azul),var(--azul-osc))}
+  #login.active{display:flex}
+  .login-card{background:#fff;padding:40px;border-radius:16px;width:360px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .brand{text-align:center;margin-bottom:24px}
+  .brand h1{color:var(--azul);font-size:30px;letter-spacing:1px}
+  .brand span{color:var(--gris);font-size:13px}
+  label{display:block;font-size:13px;color:var(--gris);margin:14px 0 6px}
+  input,select{width:100%;padding:11px 12px;border:1px solid var(--borde);
+    border-radius:8px;font-size:14px}
+  input:focus{outline:2px solid var(--celeste);border-color:var(--azul)}
+  .btn{width:100%;padding:12px;margin-top:20px;background:var(--azul);color:#fff;
+    border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--azul-osc)}
+  .btn.sec{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+  .err{color:var(--rojo);font-size:13px;margin-top:10px;display:none;text-align:center}
+
+  /* APP SHELL */
+  .topbar{background:#fff;border-bottom:1px solid var(--borde);padding:0 24px;
+    display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:10}
+  .topbar .logo{color:var(--azul);font-weight:700;font-size:20px;letter-spacing:1px}
+  .topbar .user{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--gris)}
+  .topbar .user button{background:none;border:1px solid var(--borde);padding:7px 12px;
+    border-radius:7px;cursor:pointer;color:var(--azul);font-size:13px}
+  .layout{display:flex}
+  .side{width:230px;background:#fff;border-right:1px solid var(--borde);min-height:calc(100vh - 60px);padding:16px 10px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:9px;
+    cursor:pointer;color:#374151;font-size:14px;margin-bottom:3px}
+  .nav-item:hover{background:var(--celeste)}
+  .nav-item.active{background:var(--azul);color:#fff}
+  .nav-item .ic{width:20px;text-align:center}
+  .nav-sep{font-size:11px;text-transform:uppercase;color:#9CA3AF;padding:14px 14px 6px;letter-spacing:.5px}
+  .content{flex:1;padding:28px 32px}
+  .page{display:none}
+  .page.active{display:block}
+  h2.title{font-size:22px;color:var(--azul-osc);margin-bottom:4px}
+  p.sub{color:var(--gris);font-size:13px;margin-bottom:22px}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:26px}
+  .card{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:18px}
+  .card .lbl{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.4px}
+  .card .val{font-size:24px;font-weight:700;margin-top:8px;color:var(--azul-osc)}
+  .card.green .val{color:var(--verde)}
+  .card.amber .val{color:var(--amarillo)}
+
+  .panel{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:22px;margin-bottom:22px}
+  .panel h3{font-size:16px;margin-bottom:16px;color:var(--azul-osc)}
+  .progress-wrap{background:var(--celeste);border-radius:20px;height:26px;overflow:hidden;margin:8px 0}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--azul),var(--verde));
+    color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:12px;transition:width .6s}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.data{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+  table.data th{background:var(--celeste);color:var(--azul-osc);text-align:left;padding:11px 14px;font-size:13px}
+  table.data td{padding:11px 14px;border-top:1px solid var(--borde)}
+  table.data tr:hover td{background:#FAFBFE}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .pill.ok{background:#E6F6EA;color:var(--verde)}
+  .doc-row{display:flex;align-items:center;justify-content:space-between;
+    padding:16px;border:1px solid var(--borde);border-radius:10px;margin-bottom:12px}
+  .doc-row .meta{font-size:13px;color:var(--gris);margin-top:3px}
+  .btn-sm{padding:8px 16px;background:var(--azul);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+  .btn-sm:hover{background:var(--azul-osc)}
+  .cover-list{list-style:none}
+  .cover-list li{padding:8px 0;border-bottom:1px solid var(--borde);font-size:14px}
+  .cover-list li::before{content:"✓ ";color:var(--verde);font-weight:700}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--azul-osc);color:#fff;
+    padding:14px 20px;border-radius:10px;font-size:14px;opacity:0;transform:translateY(10px);
+    transition:.3s;z-index:50}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .badge-role{font-size:11px;background:var(--celeste);color:var(--azul);padding:3px 9px;border-radius:6px}
+  /* Botón hamburguesa (oculto en desktop) */
+  .hamburger{display:none;background:none;border:1px solid var(--borde);border-radius:8px;
+    padding:7px 11px;cursor:pointer;font-size:18px;color:var(--azul);line-height:1}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
+  .overlay.show{display:block}
+
+  /* Tablet */
+  @media(max-width:1000px){
+    .content{padding:22px 24px}
+    .cards{gap:12px}
+  }
+  /* Móvil / sidebar colapsable */
+  @media(max-width:760px){
+    .hamburger{display:block}
+    .topbar{padding:0 16px}
+    .topbar .logo{font-size:18px}
+    .topbar .user{gap:8px;font-size:13px}
+    .topbar .user #whoami{display:none}
+    .side{position:fixed;top:60px;left:0;height:calc(100vh - 60px);z-index:30;
+      transform:translateX(-100%);transition:transform .28s ease;box-shadow:4px 0 16px rgba(0,0,0,.12)}
+    .side.open{transform:translateX(0)}
+    .content{padding:18px 16px}
+    .panel{padding:16px}
+    .progress-wrap{height:22px}
+  }
+  /* Móvil pequeño */
+  @media(max-width:430px){
+    .cards{grid-template-columns:1fr 1fr}
+    .login-card{width:92%;padding:28px 22px}
+    h2.title{font-size:19px}
+    .doc-row{flex-direction:column;align-items:flex-start;gap:12px}
+    .doc-row .btn-sm{align-self:stretch;text-align:center}
+    .form-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== PANTALLA 1: LOGIN ===== -->
+<div id="login" class="screen active">
+  <div class="login-card">
+    <div class="brand"><h1>ON TOUR</h1><span>Plataforma de Apoderados · Giras de Estudio</span></div>
+    <label>Correo / Usuario</label>
+    <input id="user" placeholder="apoderado@correo.cl" value="apoderado@ontour.cl">
+    <label>Contraseña</label>
+    <input id="pass" type="password" placeholder="••••••••" value="1234">
+    <label>Perfil</label>
+    <select id="role">
+      <option value="apoderado">Apoderado</option>
+      <option value="ejecutivo">Ejecutivo</option>
+      <option value="gerencia">Gerencia</option>
+    </select>
+    <button class="btn" onclick="login()">Iniciar sesión</button>
+    <div class="err" id="loginErr">Credenciales incorrectas. Intente nuevamente.</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="screen">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="hamburger" onclick="toggleSide()" aria-label="Menú">☰</button>
+      <div class="logo">ON TOUR</div>
+    </div>
+    <div class="user">
+      <span id="whoami">María Pérez</span>
+      <span class="badge-role" id="roleBadge">Apoderado</span>
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="side" id="sidebar"></nav>
+    <div class="overlay" id="overlay" onclick="toggleSide()"></div>
+    <main class="content">
+
+      <!-- PANTALLA 2: DASHBOARD -->
+      <section class="page active" id="dashboard">
+        <h2 class="title">Dashboard Apoderado</h2>
+        <p class="sub">Resumen del avance de la gira de estudio de tu pupilo.</p>
+        <div class="cards">
+          <div class="card"><div class="lbl">Saldo acumulado</div><div class="val">$600.000</div></div>
+          <div class="card"><div class="lbl">Meta total</div><div class="val">$1.000.000</div></div>
+          <div class="card amber"><div class="lbl">Saldo pendiente</div><div class="val">$400.000</div></div>
+          <div class="card green"><div class="lbl">% Avance</div><div class="val">60%</div></div>
+        </div>
+        <div class="panel">
+          <h3>Avance de la meta económica</h3>
+          <div class="progress-wrap"><div class="progress-bar" style="width:60%">60%</div></div>
+          <p style="font-size:13px;color:var(--gris);margin-top:8px">
+            Faltan <b>$400.000</b> para completar la meta de la gira "Sur de Chile 2026 · 4°B".</p>
+        </div>
+        <div class="panel">
+          <h3>Últimos depósitos</h3>
+          <div class="table-scroll"><table class="data">
+            <tr><th>Fecha</th><th>Monto</th><th>Medio</th><th>Estado</th></tr>
+            <tr><td>10-06-2026</td><td>$100.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>10-05-2026</td><td>$250.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>10-04-2026</td><td>$250.000</td><td>Webpay</td><td><span class="pill ok">Confirmado</span></td></tr>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 3: HISTORIAL DEPÓSITOS -->
+      <section class="page" id="depositos">
+        <h2 class="title">Historial de Depósitos</h2>
+        <p class="sub">Registro completo de los aportes realizados.</p>
+        <div class="panel">
+          <div class="table-scroll"><table class="data">
+            <tr><th>N°</th><th>Fecha</th><th>Monto</th><th>Medio de pago</th><th>Estado</th></tr>
+            <tr><td>1</td><td>10-04-2026</td><td>$250.000</td><td>Webpay</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>2</td><td>10-05-2026</td><td>$250.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>3</td><td>10-06-2026</td><td>$100.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr style="font-weight:700"><td colspan="2">Total depositado</td><td colspan="3">$600.000</td></tr>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 4: CONTRATO -->
+      <section class="page" id="contrato">
+        <h2 class="title">Descarga de Contrato</h2>
+        <p class="sub">Documento contractual asociado a la gira.</p>
+        <div class="panel">
+          <div class="doc-row">
+            <div>
+              <b>Contrato de Servicios — Gira Sur de Chile 2026</b>
+              <div class="meta">Curso 4°B · Firmado 15-03-2026 · PDF · 320 KB</div>
+            </div>
+            <button class="btn-sm" onclick="toast('Descargando contrato.pdf...')">⬇ Descargar PDF</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 5: PÓLIZA -->
+      <section class="page" id="poliza">
+        <h2 class="title">Descarga de Póliza</h2>
+        <p class="sub">Seguro de viaje y sus coberturas.</p>
+        <div class="panel">
+          <div class="doc-row">
+            <div>
+              <b>Póliza de Seguro de Viaje N° 884512</b>
+              <div class="meta">Vigencia 01-09-2026 al 15-09-2026 · PDF · 210 KB</div>
+            </div>
+            <button class="btn-sm" onclick="toast('Descargando poliza.pdf...')">⬇ Descargar PDF</button>
+          </div>
+          <h3 style="margin-top:8px">Coberturas incluidas</h3>
+          <ul class="cover-list">
+            <li>Atención médica de urgencia hasta UF 200</li>
+            <li>Accidentes personales durante la gira</li>
+            <li>Pérdida o robo de equipaje</li>
+            <li>Asistencia y traslado al lugar de origen</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PANTALLA 6: ADMIN CONTRATOS (ejecutivo) -->
+      <section class="page" id="admin">
+        <h2 class="title">Administración de Contratos</h2>
+        <p class="sub">Gestión de contratos de apoderados (perfil Ejecutivo).</p>
+        <div class="panel">
+          <div class="table-scroll"><table class="data">
+            <tr><th>Apoderado</th><th>Curso</th><th>Meta</th><th>Estado</th><th>Acción</th></tr>
+            <tr><td>María Pérez</td><td>4°B</td><td>$1.000.000</td><td><span class="pill ok">Vigente</span></td><td><button class="btn-sm" onclick="toast('Abriendo editor de contrato...')">Editar</button></td></tr>
+            <tr><td>Juan Soto</td><td>4°B</td><td>$1.000.000</td><td><span class="pill ok">Vigente</span></td><td><button class="btn-sm" onclick="toast('Abriendo editor de contrato...')">Editar</button></td></tr>
+            <tr><td>Ana Rojas</td><td>4°A</td><td>$1.200.000</td><td><span class="pill ok">Vigente</span></td><td><button class="btn-sm" onclick="toast('Abriendo editor de contrato...')">Editar</button></td></tr>
+          </table></div>
+        </div>
+        <div class="panel">
+          <h3>Nuevo / Editar contrato</h3>
+          <div class="form-row">
+            <div><label>Apoderado</label><input placeholder="Nombre del apoderado"></div>
+            <div><label>Curso</label><input placeholder="Ej: 4°B"></div>
+            <div><label>Meta ($)</label><input placeholder="1000000"></div>
+            <div><label>Estado</label><select><option>Vigente</option><option>Cerrado</option></select></div>
+          </div>
+          <button class="btn" style="width:200px" onclick="toast('Contrato guardado correctamente')">Guardar contrato</button>
+        </div>
+      </section>
+
+      <!-- PANTALLA 7: REPORTE AVANCE (gerencia) -->
+      <section class="page" id="reporte">
+        <h2 class="title">Reporte de Avance</h2>
+        <p class="sub">Indicadores de recaudación por gira (perfil Gerencia).</p>
+        <div class="cards">
+          <div class="card"><div class="lbl">Giras activas</div><div class="val">3</div></div>
+          <div class="card"><div class="lbl">Recaudado total</div><div class="val">$18,6M</div></div>
+          <div class="card amber"><div class="lbl">Meta global</div><div class="val">$31M</div></div>
+          <div class="card green"><div class="lbl">Avance global</div><div class="val">60%</div></div>
+        </div>
+        <div class="panel">
+          <h3>Avance por gira</h3>
+          <div class="table-scroll"><table class="data">
+            <tr><th>Gira</th><th>Curso</th><th>Recaudado</th><th>Meta</th><th>Avance</th></tr>
+            <tr><td>Sur de Chile</td><td>4°B</td><td>$15.000.000</td><td>$25.000.000</td><td>
+              <div class="progress-wrap" style="height:18px"><div class="progress-bar" style="width:60%;font-size:11px;padding-right:8px">60%</div></div></td></tr>
+            <tr><td>Norte Grande</td><td>4°A</td><td>$2.400.000</td><td>$4.000.000</td><td>
+              <div class="progress-wrap" style="height:18px"><div class="progress-bar" style="width:60%;font-size:11px;padding-right:8px">60%</div></div></td></tr>
+            <tr><td>Mendoza</td><td>3°B</td><td>$1.200.000</td><td>$2.000.000</td><td>
+              <div class="progress-wrap" style="height:18px"><div class="progress-bar" style="width:60%;font-size:11px;padding-right:8px">60%</div></div></td></tr>
+          </table></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const NAV = {
+    apoderado: [
+      {sep:"Mi gira"},
+      {id:"dashboard", ic:"🏠", label:"Dashboard"},
+      {id:"depositos", ic:"💳", label:"Historial de depósitos"},
+      {sep:"Documentos"},
+      {id:"contrato", ic:"📄", label:"Descargar contrato"},
+      {id:"poliza", ic:"🛡️", label:"Descargar póliza"},
+    ],
+    ejecutivo: [
+      {sep:"Gestión"},
+      {id:"admin", ic:"🗂️", label:"Administrar contratos"},
+      {id:"dashboard", ic:"🏠", label:"Ver dashboard"},
+    ],
+    gerencia: [
+      {sep:"Indicadores"},
+      {id:"reporte", ic:"📊", label:"Reporte de avance"},
+      {id:"dashboard", ic:"🏠", label:"Ver dashboard"},
+    ],
+  };
+  const NAMES = {apoderado:"María Pérez", ejecutivo:"Carlos Díaz", gerencia:"Gerencia On Tour"};
+  const ROLES = {apoderado:"Apoderado", ejecutivo:"Ejecutivo", gerencia:"Gerencia"};
+
+  function login(){
+    const u=document.getElementById('user').value.trim();
+    const p=document.getElementById('pass').value.trim();
+    const r=document.getElementById('role').value;
+    if(!u || p!=='1234'){ document.getElementById('loginErr').style.display='block'; return; }
+    document.getElementById('loginErr').style.display='none';
+    document.getElementById('whoami').textContent=NAMES[r];
+    document.getElementById('roleBadge').textContent=ROLES[r];
+    buildNav(r);
+    document.getElementById('login').classList.remove('active');
+    document.getElementById('app').classList.add('active');
+  }
+  function logout(){
+    document.getElementById('app').classList.remove('active');
+    document.getElementById('login').classList.add('active');
+  }
+  function buildNav(role){
+    const side=document.getElementById('sidebar'); side.innerHTML='';
+    let first=null;
+    NAV[role].forEach(item=>{
+      if(item.sep){ const s=document.createElement('div'); s.className='nav-sep'; s.textContent=item.sep; side.appendChild(s); return; }
+      const d=document.createElement('div'); d.className='nav-item'; d.dataset.target=item.id;
+      d.innerHTML='<span class="ic">'+item.ic+'</span>'+item.label;
+      d.onclick=()=>go(item.id);
+      side.appendChild(d);
+      if(!first) first=item.id;
+    });
+    go(first);
+  }
+  function go(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.target===id));
+    if(window.innerWidth<=760) closeSide();
+  }
+  function toggleSide(){
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeSide(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+  let tt;
+  function toast(msg){
+    const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2200);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0E1525">
+<title>On Tour — Plataforma de Apoderados</title>
+<style>
+  :root{
+    --azul:#5B8DEF; --azul-osc:#3A6BD0; --celeste:#1C2A4A; --verde:#34D399;
+    --gris:#94A3B8; --borde:#2A3550; --bg:#0E1525; --bg2:#151E33;
+    --panel:#1A2440; --panel2:#202C4D; --rojo:#F87171; --amarillo:#FBBF24;
+    --txt:#E7ECF5; --txt-soft:#AEB9D0;
+    --glow-azul:rgba(91,141,239,.45); --glow-verde:rgba(52,211,153,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+  html,body{min-height:100%;overflow-x:hidden}
+  body{background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(91,141,239,.12), transparent),
+      radial-gradient(900px 500px at -10% 110%, rgba(52,211,153,.10), transparent),
+      var(--bg);
+    color:var(--txt)}
+  .screen{display:none;min-height:100vh}
+  .screen.active{display:block}
+  .app-enter{animation:appIn .5s ease both}
+  @keyframes appIn{0%{opacity:0}100%{opacity:1}}
+  .page.active{animation:pageIn .4s ease both}
+  @keyframes pageIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+
+  /* LOGIN */
+  #login{display:none;min-height:100vh;min-height:100dvh;align-items:center;justify-content:center;
+    padding:20px;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#0B1020,#16203A 45%,#0E1A33);
+    background-size:200% 200%;animation:bgShift 14s ease infinite}
+  #login.active{display:flex}
+  @keyframes bgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  /* orbes flotantes de fondo */
+  .orb{position:absolute;border-radius:50%;filter:blur(10px);opacity:.5;pointer-events:none}
+  .orb.o1{width:280px;height:280px;background:#6FA8FF;top:-60px;left:-60px;animation:float1 11s ease-in-out infinite}
+  .orb.o2{width:220px;height:220px;background:#88E0A0;bottom:-50px;right:-40px;animation:float2 13s ease-in-out infinite}
+  .orb.o3{width:160px;height:160px;background:#A9C5FF;bottom:80px;left:8%;animation:float1 9s ease-in-out infinite reverse}
+  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-40px)}}
+  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-35px,25px)}}
+
+  .login-card{position:relative;z-index:2;background:rgba(26,36,64,.92);
+    backdrop-filter:blur(14px);padding:42px 38px;border-radius:22px;width:380px;max-width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,.55);border:1px solid rgba(91,141,239,.25);
+    animation:cardIn .7s cubic-bezier(.16,1,.3,1) both}
+  @keyframes cardIn{0%{opacity:0;transform:translateY(36px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+  /* cascada de los elementos internos */
+  .login-card>*{animation:fadeUp .6s ease both}
+  .login-card .brand{animation-delay:.12s}
+  .login-card .fld:nth-of-type(1){animation-delay:.2s}
+  .login-card .fld:nth-of-type(2){animation-delay:.3s}
+  .login-card .fld:nth-of-type(3){animation-delay:.4s}
+  .login-card .btn{animation-delay:.5s}
+  @keyframes fadeUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+
+  .brand{text-align:center;margin-bottom:26px}
+  .brand .logo-badge{width:64px;height:64px;margin:0 auto 14px;border-radius:18px;
+    background:linear-gradient(135deg,var(--azul),var(--azul-osc));display:flex;align-items:center;
+    justify-content:center;font-size:30px;box-shadow:0 10px 24px rgba(46,90,172,.4);
+    animation:badgePop .8s cubic-bezier(.16,1,.3,1) both .25s}
+  @keyframes badgePop{0%{opacity:0;transform:scale(.4) rotate(-12deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+  .brand h1{font-size:30px;letter-spacing:2px;font-weight:800;
+    background:linear-gradient(90deg,var(--azul),var(--verde));-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  .brand span{color:var(--txt-soft);font-size:13px;display:block;margin-top:4px}
+
+  /* campos con label flotante */
+  .fld{position:relative;margin-top:20px}
+  .fld input,.fld select{width:100%;padding:16px 14px 8px;border:1.5px solid var(--borde);
+    border-radius:11px;font-size:15px;background:var(--panel2);color:var(--txt);
+    transition:border-color .2s,box-shadow .2s}
+  .fld select{padding-top:18px}
+  .fld select option{background:var(--panel2);color:var(--txt)}
+  .fld label{position:absolute;left:14px;top:14px;font-size:14px;color:#6b7896;pointer-events:none;
+    transition:.18s ease;background:transparent}
+  .fld input:focus,.fld select:focus{outline:none;border-color:var(--azul);
+    box-shadow:0 0 0 4px var(--glow-azul)}
+  .fld input:focus+label,.fld input:not(:placeholder-shown)+label,
+  .fld.filled label,.fld select:focus+label,.fld select+label{
+    top:6px;font-size:11px;color:var(--azul);font-weight:600}
+  .fld input::placeholder{color:transparent}
+
+  .btn{position:relative;width:100%;padding:14px;margin-top:24px;
+    background:linear-gradient(135deg,var(--azul),var(--azul-osc));color:#fff;
+    border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;
+    letter-spacing:.3px;overflow:hidden;transition:transform .15s,box-shadow .25s;
+    box-shadow:0 8px 20px rgba(46,90,172,.35)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(46,90,172,.45)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn .spinner{display:none;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);
+    border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;
+    vertical-align:middle;margin-right:8px}
+  .btn.loading .spinner{display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .btn.sec{background:transparent;color:var(--azul);border:1px solid var(--azul)}
+  .err{color:var(--rojo);font-size:13px;margin-top:12px;display:none;text-align:center;
+    background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3);
+    padding:9px;border-radius:9px;animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+  .content label{display:block;font-size:13px;color:var(--txt-soft);margin:14px 0 6px}
+  .content input,.content select{width:100%;padding:11px 12px;border:1px solid var(--borde);
+    border-radius:8px;font-size:14px;background:var(--panel2);color:var(--txt)}
+  .content input::placeholder{color:#5d6b8a}
+  .content input:focus,.content select:focus{outline:none;border-color:var(--azul);
+    box-shadow:0 0 0 3px var(--glow-azul)}
+
+  /* APP SHELL */
+  .topbar{background:rgba(21,30,51,.85);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--borde);padding:0 24px;
+    display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:10}
+  .topbar .logo{font-weight:800;font-size:20px;letter-spacing:1.5px;
+    background:linear-gradient(90deg,var(--azul),var(--verde));-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  .topbar .user{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--txt-soft)}
+  .topbar .user button{background:none;border:1px solid var(--borde);padding:7px 12px;
+    border-radius:7px;cursor:pointer;color:var(--azul);font-size:13px;transition:.2s}
+  .topbar .user button:hover{background:var(--celeste);border-color:var(--azul)}
+  .layout{display:flex}
+  .side{width:230px;background:var(--bg2);border-right:1px solid var(--borde);
+    min-height:calc(100vh - 60px);padding:16px 10px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:9px;
+    cursor:pointer;color:var(--txt-soft);font-size:14px;margin-bottom:3px;
+    transition:background .2s,color .2s,transform .15s}
+  .nav-item:hover{background:var(--celeste);color:var(--txt);transform:translateX(3px)}
+  .nav-item.active{background:linear-gradient(135deg,var(--azul),var(--azul-osc));color:#fff;
+    box-shadow:0 6px 16px var(--glow-azul)}
+  .nav-item .ic{width:20px;text-align:center}
+  .nav-sep{font-size:11px;text-transform:uppercase;color:#64748B;padding:14px 14px 6px;letter-spacing:.5px}
+  .content{flex:1;padding:28px 32px}
+  .page{display:none}
+  .page.active{display:block}
+  h2.title{font-size:22px;color:var(--txt);margin-bottom:4px}
+  p.sub{color:var(--txt-soft);font-size:13px;margin-bottom:22px}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:26px}
+  .card{position:relative;background:linear-gradient(160deg,var(--panel),var(--panel2));
+    border:1px solid var(--borde);border-radius:14px;padding:18px;overflow:hidden;
+    transition:transform .25s,box-shadow .25s,border-color .25s;
+    animation:cardRise .55s cubic-bezier(.16,1,.3,1) both}
+  .card:nth-child(1){animation-delay:.05s}
+  .card:nth-child(2){animation-delay:.13s}
+  .card:nth-child(3){animation-delay:.21s}
+  .card:nth-child(4){animation-delay:.29s}
+  @keyframes cardRise{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--azul),var(--verde))}
+  .card:hover{transform:translateY(-5px);border-color:var(--azul);
+    box-shadow:0 14px 34px rgba(0,0,0,.4),0 0 0 1px var(--glow-azul)}
+  .card .lbl{font-size:12px;color:var(--txt-soft);text-transform:uppercase;letter-spacing:.4px}
+  .card .val{font-size:26px;font-weight:800;margin-top:8px;color:#fff}
+  .card.green .val{color:var(--verde);text-shadow:0 0 18px var(--glow-verde)}
+  .card.amber .val{color:var(--amarillo);text-shadow:0 0 18px rgba(251,191,36,.35)}
+  .card .val{text-shadow:0 0 18px var(--glow-azul)}
+
+  .panel{background:linear-gradient(160deg,var(--panel),var(--panel2));
+    border:1px solid var(--borde);border-radius:14px;padding:22px;margin-bottom:22px;
+    animation:cardRise .55s cubic-bezier(.16,1,.3,1) both .15s}
+  .panel h3{font-size:16px;margin-bottom:16px;color:var(--txt)}
+  .progress-wrap{position:relative;background:#0E1730;border:1px solid var(--borde);
+    border-radius:20px;height:28px;overflow:hidden;margin:8px 0}
+  .progress-bar{height:100%;width:0;border-radius:20px;
+    background:linear-gradient(90deg,var(--azul),var(--verde));
+    color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:12px;transition:width 1.4s cubic-bezier(.22,1,.36,1);
+    box-shadow:0 0 20px var(--glow-verde);position:relative;overflow:hidden}
+  /* brillo que recorre la barra */
+  .progress-bar::after{content:"";position:absolute;top:0;left:0;height:100%;width:60px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+    animation:shine 2.2s ease-in-out infinite}
+  @keyframes shine{0%{transform:translateX(-80px)}100%{transform:translateX(420px)}}
+
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.data{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+  table.data th{background:var(--celeste);color:var(--txt);text-align:left;padding:11px 14px;font-size:13px}
+  table.data td{padding:11px 14px;border-top:1px solid var(--borde);color:var(--txt-soft)}
+  table.data tr{transition:background .2s}
+  table.data tbody tr:hover td,table.data tr:hover td{background:rgba(91,141,239,.08);color:var(--txt)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .pill.ok{background:rgba(52,211,153,.15);color:var(--verde);border:1px solid rgba(52,211,153,.3)}
+  .doc-row{display:flex;align-items:center;justify-content:space-between;
+    padding:16px;border:1px solid var(--borde);border-radius:10px;margin-bottom:12px;
+    background:var(--panel2);transition:.2s}
+  .doc-row:hover{border-color:var(--azul);box-shadow:0 0 0 1px var(--glow-azul)}
+  .doc-row b{color:var(--txt)}
+  .doc-row .meta{font-size:13px;color:var(--txt-soft);margin-top:3px}
+  .btn-sm{padding:8px 16px;background:linear-gradient(135deg,var(--azul),var(--azul-osc));
+    color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
+    transition:transform .15s,box-shadow .2s}
+  .btn-sm:hover{transform:translateY(-2px);box-shadow:0 8px 18px var(--glow-azul)}
+  .cover-list{list-style:none}
+  .cover-list li{padding:8px 0;border-bottom:1px solid var(--borde);font-size:14px;color:var(--txt-soft)}
+  .cover-list li::before{content:"✓ ";color:var(--verde);font-weight:700}
+  .toast{position:fixed;bottom:24px;right:24px;
+    background:linear-gradient(135deg,var(--azul),var(--azul-osc));color:#fff;
+    padding:14px 20px;border-radius:10px;font-size:14px;opacity:0;transform:translateY(10px);
+    transition:.3s;z-index:50;box-shadow:0 12px 30px var(--glow-azul)}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .badge-role{font-size:11px;background:var(--celeste);color:var(--azul);padding:3px 9px;
+    border-radius:6px;border:1px solid var(--borde)}
+  /* Botón hamburguesa (oculto en desktop) */
+  .hamburger{display:none;background:none;border:1px solid var(--borde);border-radius:8px;
+    padding:7px 11px;cursor:pointer;font-size:18px;color:var(--azul);line-height:1}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
+  .overlay.show{display:block}
+
+  /* Tablet */
+  @media(max-width:1000px){
+    .content{padding:22px 24px}
+    .cards{gap:12px}
+  }
+  /* Móvil / sidebar colapsable */
+  @media(max-width:760px){
+    .hamburger{display:block}
+    .topbar{padding:0 16px}
+    .topbar .logo{font-size:18px}
+    .topbar .user{gap:8px;font-size:13px}
+    .topbar .user #whoami{display:none}
+    .side{position:fixed;top:60px;left:0;height:calc(100vh - 60px);z-index:30;
+      transform:translateX(-100%);transition:transform .28s ease;box-shadow:4px 0 16px rgba(0,0,0,.12)}
+    .side.open{transform:translateX(0)}
+    .content{padding:18px 16px}
+    .panel{padding:16px}
+    .progress-wrap{height:22px}
+  }
+  /* Móvil pequeño */
+  @media(max-width:430px){
+    .cards{grid-template-columns:1fr 1fr}
+    .login-card{padding:32px 24px;border-radius:18px}
+    .fld input,.fld select{font-size:16px}      /* evita zoom automático en iOS */
+    .content input,.content select{font-size:16px}
+    .brand h1{font-size:26px}
+    .brand .logo-badge{width:56px;height:56px;font-size:26px}
+    h2.title{font-size:19px}
+    .doc-row{flex-direction:column;align-items:flex-start;gap:12px}
+    .doc-row .btn-sm{align-self:stretch;text-align:center}
+    .form-row{grid-template-columns:1fr}
+    .orb.o1{width:200px;height:200px}
+    .orb.o2{width:160px;height:160px}
+    .orb.o3{display:none}
+  }
+  /* Pantallas muy bajas (móvil horizontal) */
+  @media(max-height:560px){
+    #login{align-items:flex-start;padding-top:24px;padding-bottom:24px}
+    .brand{margin-bottom:18px}
+    .brand .logo-badge{margin-bottom:8px}
+  }
+  /* Respeta preferencia de menos animación */
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== PANTALLA 1: LOGIN ===== -->
+<div id="login" class="screen active">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="login-card">
+    <div class="brand">
+      <div class="logo-badge">✈️</div>
+      <h1>ON TOUR</h1>
+      <span>Plataforma de Apoderados · Giras de Estudio</span>
+    </div>
+    <div class="fld">
+      <input id="user" placeholder=" " value="apoderado@ontour.cl">
+      <label for="user">Correo / Usuario</label>
+    </div>
+    <div class="fld">
+      <input id="pass" type="password" placeholder=" " value="1234">
+      <label for="pass">Contraseña</label>
+    </div>
+    <div class="fld">
+      <select id="role">
+        <option value="apoderado">Apoderado</option>
+        <option value="ejecutivo">Ejecutivo</option>
+        <option value="gerencia">Gerencia</option>
+      </select>
+      <label for="role">Perfil</label>
+    </div>
+    <button class="btn" id="loginBtn" onclick="login()"><span class="spinner"></span><span class="btn-txt">Iniciar sesión</span></button>
+    <div class="err" id="loginErr">Credenciales incorrectas. Intente nuevamente.</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="screen">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="hamburger" onclick="toggleSide()" aria-label="Menú">☰</button>
+      <div class="logo">ON TOUR</div>
+    </div>
+    <div class="user">
+      <span id="whoami">María Pérez</span>
+      <span class="badge-role" id="roleBadge">Apoderado</span>
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="layout">
+    <nav class="side" id="sidebar"></nav>
+    <div class="overlay" id="overlay" onclick="toggleSide()"></div>
+    <main class="content">
+
+      <!-- PANTALLA 2: DASHBOARD -->
+      <section class="page active" id="dashboard">
+        <h2 class="title">Dashboard Apoderado</h2>
+        <p class="sub">Resumen del avance de la gira de estudio de tu pupilo.</p>
+        <div class="cards">
+          <div class="card"><div class="lbl">Saldo acumulado</div><div class="val" data-count="600000" data-prefix="$" data-grp="1">$600.000</div></div>
+          <div class="card"><div class="lbl">Meta total</div><div class="val" data-count="1000000" data-prefix="$" data-grp="1">$1.000.000</div></div>
+          <div class="card amber"><div class="lbl">Saldo pendiente</div><div class="val" data-count="400000" data-prefix="$" data-grp="1">$400.000</div></div>
+          <div class="card green"><div class="lbl">% Avance</div><div class="val" data-count="60" data-suffix="%">60%</div></div>
+        </div>
+        <div class="panel">
+          <h3>Avance de la meta económica</h3>
+          <div class="progress-wrap"><div class="progress-bar" data-target="60" style="width:0">60%</div></div>
+          <p style="font-size:13px;color:var(--gris);margin-top:8px">
+            Faltan <b>$400.000</b> para completar la meta de la gira "Sur de Chile 2026 · 4°B".</p>
+        </div>
+        <div class="panel">
+          <h3>Últimos depósitos</h3>
+          <div class="table-scroll"><table class="data">
+            <tr><th>Fecha</th><th>Monto</th><th>Medio</th><th>Estado</th></tr>
+            <tr><td>10-06-2026</td><td>$100.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>10-05-2026</td><td>$250.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>10-04-2026</td><td>$250.000</td><td>Webpay</td><td><span class="pill ok">Confirmado</span></td></tr>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 3: HISTORIAL DEPÓSITOS -->
+      <section class="page" id="depositos">
+        <h2 class="title">Historial de Depósitos</h2>
+        <p class="sub">Registro completo de los aportes realizados.</p>
+        <div class="panel">
+          <div class="table-scroll"><table class="data">
+            <tr><th>N°</th><th>Fecha</th><th>Monto</th><th>Medio de pago</th><th>Estado</th></tr>
+            <tr><td>1</td><td>10-04-2026</td><td>$250.000</td><td>Webpay</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>2</td><td>10-05-2026</td><td>$250.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr><td>3</td><td>10-06-2026</td><td>$100.000</td><td>Transferencia</td><td><span class="pill ok">Confirmado</span></td></tr>
+            <tr style="font-weight:700"><td colspan="2">Total depositado</td><td colspan="3">$600.000</td></tr>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 4: CONTRATO -->
+      <section class="page" id="contrato">
+        <h2 class="title">Descarga de Contrato</h2>
+        <p class="sub">Documento contractual asociado a la gira.</p>
+        <div class="panel">
+          <div class="doc-row">
+            <div>
+              <b>Contrato de Servicios — Gira Sur de Chile 2026</b>
+              <div class="meta">Curso 4°B · Firmado 15-03-2026 · PDF · 320 KB</div>
+            </div>
+            <button class="btn-sm" onclick="toast('Descargando contrato.pdf...')">⬇ Descargar PDF</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANTALLA 5: PÓLIZA -->
+      <section class="page" id="poliza">
+        <h2 class="title">Descarga de Póliza</h2>
+        <p class="sub">Seguro de viaje y sus coberturas.</p>
+        <div class="panel">
+          <div class="doc-row">
+            <div>
+              <b>Póliza de Seguro de Viaje N° 884512</b>
+              <div class="meta">Vigencia 01-09-2026 al 15-09-2026 · PDF · 210 KB</div>
+            </div>
+            <button class="btn-sm" onclick="toast('Descargando poliza.pdf...')">⬇ Descargar PDF</button>
+          </div>
+          <h3 style="margin-top:8px">Coberturas incluidas</h3>
+          <ul class="cover-list">
+            <li>Atención médica de urgencia hasta UF 200</li>
+            <li>Accidentes personales durante la gira</li>
+            <li>Pérdida o robo de equipaje</li>
+            <li>Asistencia y traslado al lugar de origen</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PANTALLA 6: ADMIN CONTRATOS (ejecutivo) -->
+      <section class="page" id="admin">
+        <h2 class="title">Administración de Contratos</h2>
+        <p class="sub">Gestión de contratos de apoderados (perfil Ejecutivo).</p>
+        <div class="panel">
+          <div class="table-scroll"><table class="data">
+            <tr><th>Apoderado</th><th>Curso</th><th>Meta</th><th>Estado</th><th>Acción</th></tr>
+            <tr><td>María Pérez</td><td>4°B</td><td>$1.000.000</td><td><span class="pill ok">Vigente</span></td><td><button class="btn-sm" onclick="toast('Abriendo editor de contrato...')">Editar</button></td></tr>
+            <tr><td>Juan Soto</td><td>4°B</td><td>$1.000.000</td><td><span class="pill ok">Vigente</span></td><td><button class="btn-sm" onclick="toast('Abriendo editor de contrato...')">Editar</button></td></tr>
+            <tr><td>Ana Rojas</td><td>4°A</td><td>$1.200.000</td><td><span class="pill ok">Vigente</span></td><td><button class="btn-sm" onclick="toast('Abriendo editor de contrato...')">Editar</button></td></tr>
+          </table></div>
+        </div>
+        <div class="panel">
+          <h3>Nuevo / Editar contrato</h3>
+          <div class="form-row">
+            <div><label>Apoderado</label><input placeholder="Nombre del apoderado"></div>
+            <div><label>Curso</label><input placeholder="Ej: 4°B"></div>
+            <div><label>Meta ($)</label><input placeholder="1000000"></div>
+            <div><label>Estado</label><select><option>Vigente</option><option>Cerrado</option></select></div>
+          </div>
+          <button class="btn" style="width:200px" onclick="toast('Contrato guardado correctamente')">Guardar contrato</button>
+        </div>
+      </section>
+
+      <!-- PANTALLA 7: REPORTE AVANCE (gerencia) -->
+      <section class="page" id="reporte">
+        <h2 class="title">Reporte de Avance</h2>
+        <p class="sub">Indicadores de recaudación por gira (perfil Gerencia).</p>
+        <div class="cards">
+          <div class="card"><div class="lbl">Giras activas</div><div class="val">3</div></div>
+          <div class="card"><div class="lbl">Recaudado total</div><div class="val">$18,6M</div></div>
+          <div class="card amber"><div class="lbl">Meta global</div><div class="val">$31M</div></div>
+          <div class="card green"><div class="lbl">Avance global</div><div class="val">60%</div></div>
+        </div>
+        <div class="panel">
+          <h3>Avance por gira</h3>
+          <div class="table-scroll"><table class="data">
+            <tr><th>Gira</th><th>Curso</th><th>Recaudado</th><th>Meta</th><th>Avance</th></tr>
+            <tr><td>Sur de Chile</td><td>4°B</td><td>$15.000.000</td><td>$25.000.000</td><td>
+              <div class="progress-wrap" style="height:18px"><div class="progress-bar" data-target="60" style="width:0;font-size:11px;padding-right:8px">60%</div></div></td></tr>
+            <tr><td>Norte Grande</td><td>4°A</td><td>$2.400.000</td><td>$4.000.000</td><td>
+              <div class="progress-wrap" style="height:18px"><div class="progress-bar" data-target="60" style="width:0;font-size:11px;padding-right:8px">60%</div></div></td></tr>
+            <tr><td>Mendoza</td><td>3°B</td><td>$1.200.000</td><td>$2.000.000</td><td>
+              <div class="progress-wrap" style="height:18px"><div class="progress-bar" data-target="60" style="width:0;font-size:11px;padding-right:8px">60%</div></div></td></tr>
+          </table></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const NAV = {
+    apoderado: [
+      {sep:"Mi gira"},
+      {id:"dashboard", ic:"🏠", label:"Dashboard"},
+      {id:"depositos", ic:"💳", label:"Historial de depósitos"},
+      {sep:"Documentos"},
+      {id:"contrato", ic:"📄", label:"Descargar contrato"},
+      {id:"poliza", ic:"🛡️", label:"Descargar póliza"},
+    ],
+    ejecutivo: [
+      {sep:"Gestión"},
+      {id:"admin", ic:"🗂️", label:"Administrar contratos"},
+      {id:"dashboard", ic:"🏠", label:"Ver dashboard"},
+    ],
+    gerencia: [
+      {sep:"Indicadores"},
+      {id:"reporte", ic:"📊", label:"Reporte de avance"},
+      {id:"dashboard", ic:"🏠", label:"Ver dashboard"},
+    ],
+  };
+  const NAMES = {apoderado:"María Pérez", ejecutivo:"Carlos Díaz", gerencia:"Gerencia On Tour"};
+  const ROLES = {apoderado:"Apoderado", ejecutivo:"Ejecutivo", gerencia:"Gerencia"};
+
+  function login(){
+    const u=document.getElementById('user').value.trim();
+    const p=document.getElementById('pass').value.trim();
+    const r=document.getElementById('role').value;
+    const errEl=document.getElementById('loginErr');
+    if(!u || p!=='1234'){
+      errEl.style.display='block';
+      errEl.style.animation='none'; void errEl.offsetWidth; errEl.style.animation='shake .4s';
+      return;
+    }
+    errEl.style.display='none';
+    const btn=document.getElementById('loginBtn');
+    btn.classList.add('loading');
+    btn.querySelector('.btn-txt').textContent='Ingresando...';
+    setTimeout(()=>{
+      btn.classList.remove('loading');
+      btn.querySelector('.btn-txt').textContent='Iniciar sesión';
+      document.getElementById('whoami').textContent=NAMES[r];
+      document.getElementById('roleBadge').textContent=ROLES[r];
+      buildNav(r);
+      document.getElementById('login').classList.remove('active');
+      const app=document.getElementById('app');
+      app.classList.add('active');
+      app.classList.remove('app-enter'); void app.offsetWidth; app.classList.add('app-enter');
+      const ap=activePage(); if(ap) animatePage(ap);
+    },650);
+  }
+  function logout(){
+    document.getElementById('app').classList.remove('active');
+    document.getElementById('login').classList.add('active');
+  }
+  function buildNav(role){
+    const side=document.getElementById('sidebar'); side.innerHTML='';
+    let first=null;
+    NAV[role].forEach(item=>{
+      if(item.sep){ const s=document.createElement('div'); s.className='nav-sep'; s.textContent=item.sep; side.appendChild(s); return; }
+      const d=document.createElement('div'); d.className='nav-item'; d.dataset.target=item.id;
+      d.innerHTML='<span class="ic">'+item.ic+'</span>'+item.label;
+      d.onclick=()=>go(item.id);
+      side.appendChild(d);
+      if(!first) first=item.id;
+    });
+    go(first,true); // navega sin animar todavía
+  }
+  function go(id,skipAnim){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const page=document.getElementById(id);
+    page.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.target===id));
+    if(window.innerWidth<=760) closeSide();
+    if(!skipAnim) animatePage(page);
+  }
+  function activePage(){ return document.querySelector('.page.active'); }
+
+  function animatePage(page){
+    // Barras de progreso: de 0 al objetivo
+    page.querySelectorAll('.progress-bar[data-target]').forEach(bar=>{
+      bar.style.width='0';
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+        bar.style.width=bar.dataset.target+'%';
+      });});
+    });
+    // Contadores numéricos
+    page.querySelectorAll('.val[data-count]').forEach(el=>countUp(el));
+  }
+
+  function countUp(el){
+    const target=parseFloat(el.dataset.count);
+    const prefix=el.dataset.prefix||'';
+    const suffix=el.dataset.suffix||'';
+    const grp=el.dataset.grp==='1';
+    const dur=1100, start=performance.now();
+    function fmt(n){
+      n=Math.round(n);
+      return prefix+(grp?n.toLocaleString('es-CL'):n)+suffix;
+    }
+    function step(now){
+      let t=Math.min((now-start)/dur,1);
+      t=1-Math.pow(1-t,3); // easeOutCubic
+      el.textContent=fmt(target*t);
+      if(t<1) requestAnimationFrame(step);
+      else el.textContent=fmt(target);
+    }
+    requestAnimationFrame(step);
+  }
+  function toggleSide(){
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeSide(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+  let tt;
+  function toast(msg){
+    const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2200);
+  }
+  // Enviar con Enter desde los campos del login
+  ['user','pass'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') login(); });
+  });
+</script>
+</body>
+</html>
